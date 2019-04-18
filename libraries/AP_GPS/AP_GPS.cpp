@@ -700,12 +700,12 @@ void AP_GPS::update(void)
         if (state[i].status != NO_GPS) {
             num_instances = i+1;
         }
-    }
 
-    if( state[i].have_gps_yaw && yawTimeCount>250 )
-    {
-    	gcs().send_text(MAV_SEVERITY_INFO, "GPS Yaw: %.2f", static_cast<double>(state[i].gps_yaw));
-    	yawTimeCount = 0;
+        if( state[i].have_gps_yaw && yawTimeCount>250 )
+        {
+        	gcs().send_text(MAV_SEVERITY_INFO, "GPS Yaw: %.2f", static_cast<double>(state[i].gps_yaw));
+        	yawTimeCount = 0;
+        }
     }
 
     // if blending is requested, attempt to calculate weighting for each GPS

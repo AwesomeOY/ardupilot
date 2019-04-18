@@ -234,7 +234,7 @@ void NavEKF3_core::alignYawAngle()
     initialiseQuatCovariances(angleErrVarVec);
 
     // send yaw alignment information to console
-    GCS_MAVLINK::send_statustext_all(MAV_SEVERITY_INFO, "EKF3 IMU%u yaw aligned",(unsigned)imu_index);
+    gcs().send_text(MAV_SEVERITY_INFO, "EKF3 IMU%u yaw aligned",(unsigned)imu_index);
 
 
     // record the yaw reset event
@@ -930,11 +930,11 @@ void NavEKF3_core::fuseEulerYaw(bool usePredictedYaw, bool useExternalYawSensor)
     float innovation;
     if (!usePredictedYaw) {
         if (!useExternalYawSensor) {
-		   // Use the difference between the horizontal projection and declination to give the measured yaw
-		   // rotate measured mag components into earth frame
-		   Vector3f magMeasNED = Tbn_zeroYaw*magDataDelayed.mag;
-		   float yawAngMeasured = wrap_PI(-atan2f(magMeasNED.y, magMeasNED.x) + _ahrs->get_compass()->get_declination())
-           innovation = wrap_PI(yawAngPredicted - yawAngMeasured);
+            // Use the difference between the horizontal projection and declination to give the measured yaw
+            // rotate measured mag components into earth frame
+            Vector3f magMeasNED = Tbn_zeroYaw*magDataDelayed.mag;
+            float yawAngMeasured = wrap_PI(-atan2f(magMeasNED.y, magMeasNED.x) + _ahrs->get_compass()->get_declination());
+            innovation = wrap_PI(yawAngPredicted - yawAngMeasured);
         } else {
             // use the external yaw sensor data
             innovation = wrap_PI(yawAngPredicted - yawAngDataDelayed.yawAng);
