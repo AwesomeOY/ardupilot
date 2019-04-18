@@ -90,7 +90,8 @@ public:
         GPS_TYPE_GSOF  = 11,
         GPS_TYPE_ERB = 13,
         GPS_TYPE_MAV = 14,
-        GPS_TYPE_NOVA = 15
+        GPS_TYPE_NOVA = 15,
+        GPS_TYPE_HEMI = 16, // hemisphere NMEA
     };
 
     /// GPS status codes
@@ -136,6 +137,7 @@ public:
         Location location;                  ///< last fix location
         float ground_speed;                 ///< ground speed in m/sec
         float ground_course;                ///< ground course in degrees
+        float gps_yaw;                      ///< GPS derived yaw information, if available (degrees)
         uint16_t hdop;                      ///< horizontal dilution of precision in cm
         uint16_t vdop;                      ///< vertical dilution of precision in cm
         uint8_t num_sats;                   ///< Number of visible satellites
@@ -144,6 +146,7 @@ public:
         float horizontal_accuracy;          ///< horizontal RMS accuracy estimate in m
         float vertical_accuracy;            ///< vertical RMS accuracy estimate in m
         bool have_vertical_velocity:1;      ///< does GPS give vertical velocity? Set to true only once available.
+        bool have_gps_yaw;                ///< does GPS give yaw? Set to true only once available.
         bool have_speed_accuracy:1;         ///< does GPS give speed accuracy? Set to true only once available.
         bool have_horizontal_accuracy:1;    ///< does GPS give horizontal position accuracy? Set to true only once available.
         bool have_vertical_accuracy:1;      ///< does GPS give vertical position accuracy? Set to true only once available.
@@ -257,6 +260,23 @@ public:
         return ground_course_cd(primary_instance);
     }
 
+    // yaw in degrees if available
+    bool gps_yaw_deg(uint8_t instance, float &yaw_deg, float &accuracy_deg) const {
+        if (!have_gps_yaw(instance)) {
+            return false;
+        }
+        yaw_deg = state[instance].gps_yaw;
+        // None of the GPS backends can provide this yet, so we hard
+        // code a fixed value of 10 degrees, which seems like a
+        // reasonable guess. Once a backend can provide a proper
+        // estimate we can implement it
+        accuracy_deg = 2;
+        return true;
+    }
+    bool gps_yaw_deg(float &yaw_deg, float &accuracy_deg) const {
+        return gps_yaw_deg(primary_instance, yaw_deg, accuracy_deg);
+    }
+
     // number of locked satellites
     uint8_t num_sats(uint8_t instance) const {
         return state[instance].num_sats;
@@ -345,6 +365,14 @@ public:
     }
     uint32_t rtk_age_ms(void) const {
         return rtk_age_ms(primary_instance);
+    }
+
+    // return true if the GPS supports yaw
+    bool have_gps_yaw(uint8_t instance) const {
+        return state[instance].have_gps_yaw;
+    }
+    bool have_gps_yaw(void) const {
+        return have_gps_yaw(primary_instance);
     }
 
     // the expected lag (in seconds) in the position and velocity readings from the gps

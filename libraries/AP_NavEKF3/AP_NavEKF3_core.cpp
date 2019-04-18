@@ -48,8 +48,7 @@ bool NavEKF3_core::setup_core(NavEKF3 *_frontend, uint8_t _imu_index, uint8_t _c
 
     /*
       The imu_buffer_length needs to cope with the worst case sensor delay at the
-      maximum fusion rate of 100Hz. Non-imu data coming in at faster than 100Hz is
-      downsampled. For 50Hz main loop rate we need a shorter buffer.
+     target EKF state prediction rate. Non-IMU data coming in faster is downsampled.
      */
 
     // Calculate the expected EKF time step
@@ -126,6 +125,9 @@ bool NavEKF3_core::setup_core(NavEKF3 *_frontend, uint8_t _imu_index, uint8_t _c
         return false;
     }
     if(!storedWheelOdm.init(imu_buffer_length)) { // initialise to same length of IMU to allow for multiple wheel sensors
+        return false;
+    }
+    if(!storedYawAng.init(obs_buffer_length)) {
         return false;
     }
     // Note: the use of dual range finders potentially doubles the amount of data to be stored
@@ -379,10 +381,16 @@ void NavEKF3_core::InitialiseVariables()
     usingWheelSensors = false;
     wheelOdmMeasTime_ms = 0;
 
+    // yaw sensor fusion
+    yawMeasTime_ms = 0;
+    memset(&yawAngDataNew, 0, sizeof(yawAngDataNew));
+    memset(&yawAngDataDelayed, 0, sizeof(yawAngDataDelayed));
+
     // zero data buffers
     storedIMU.reset();
     storedGPS.reset();
     storedMag.reset();
+    storedYawAng.reset();
     storedBaro.reset();
     storedTAS.reset();
     storedRange.reset();
@@ -563,7 +571,7 @@ void NavEKF3_core::UpdateFilter(bool predict)
         // Predict the covariance growth
         CovariancePrediction();
 
-        // Update states using  magnetometer data
+        // Update states using  magnetometer or external yaw sensor data
         SelectMagFusion();
 
         // Update states using GPS and altimeter data
@@ -685,7 +693,7 @@ void NavEKF3_core::UpdateStrapdownEquationsNED()
  * The inspiration for using a complementary filter to correct for time delays in the EKF
  * is based on the work by A Khosravian.
  *
- * “Recursive Attitude Estimation in the Presence of Multi-rate and Multi-delay Vector Measurements”
+ * 鈥淩ecursive Attitude Estimation in the Presence of Multi-rate and Multi-delay Vector Measurements鈥�
  * A Khosravian, J Trumpf, R Mahony, T Hamel, Australian National University
 */
 void NavEKF3_core::calcOutputStates()
