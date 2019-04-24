@@ -33,11 +33,11 @@ const AP_FWVersion AP_FWVersion::fwver{
     .fw_hash_str = GIT_VERSION,
 #endif
 #ifdef PX4_GIT_VERSION
-    .middleware_name = "PX4",
+    .middleware_name = "Mind",
     .middleware_hash_str = PX4_GIT_VERSION,
 #endif
 #ifdef NUTTX_GIT_VERSION
-    .os_name = "NuttX",
+    .os_name = "RTOS",
     .os_hash_str = NUTTX_GIT_VERSION,
 #elif defined(CHIBIOS_GIT_VERSION)
     .middleware_name = nullptr,
