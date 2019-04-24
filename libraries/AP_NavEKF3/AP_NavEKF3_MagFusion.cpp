@@ -267,14 +267,14 @@ void NavEKF3_core::SelectMagFusion()
             if (tiltAlignComplete && !yawAlignComplete) {
                 alignYawAngle();
             } else if (tiltAlignComplete && yawAlignComplete) {
-                fuseEulerYaw(false, true);
+                fuseEulerYaw(false, true);  /* 不使用预测偏航，但使用外部航向数据 */
             } else {
-                fuseEulerYaw(true, true);
+                fuseEulerYaw(true, true);   /* 使用预测偏航，使用外部航向数据 */
             }
         }
 
         if ((onGround || !assume_zero_sideslip()) && (imuSampleTime_ms - lastSynthYawTime_ms > 15000)) {
-            fuseEulerYaw(false, true);
+            fuseEulerYaw(true, false);
             magTestRatio.zero();
             yawTestRatio = 0.0f;
             lastSynthYawTime_ms = imuSampleTime_ms;
