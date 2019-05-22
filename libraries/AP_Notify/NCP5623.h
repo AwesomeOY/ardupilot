@@ -18,6 +18,7 @@
 #pragma once
 
 #include <AP_HAL/I2CDevice.h>
+#include <GCS_MAVLink/GCS.h>
 #include "RGBLed.h"
 
 class NCP5623 : public RGBLed {

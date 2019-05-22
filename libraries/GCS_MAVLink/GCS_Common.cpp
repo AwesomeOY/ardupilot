@@ -194,12 +194,12 @@ void GCS_MAVLINK::send_power_status(void)
                                   hal.analogin->power_status_flags());
 }
 
-#if BATTMONITOR_SMBUS_MAXELL_NUM_CELLS>10
-bool GCS_MAVLINK::send_battery_status_o10s(void) //add by awesome
+bool GCS_MAVLINK::send_battery_status_o10s(void) const //add by awesome
 {
+	static bool first[5] = {false, false, false, false, false };
 	bool have_o10s = false;
 	uint8_t ins = 0;
-	const AP_BattMonitor &battery = AP::battery();
+	AP_BattMonitor &battery = AP::battery();
 	for(uint8_t i=0; i<battery.num_instances(); ++i){
 		if(battery.get_type(i)==AP_BattMonitor_Params::BattMonitor_TYPE_MAXELL){
 			have_o10s = true;
@@ -211,39 +211,40 @@ bool GCS_MAVLINK::send_battery_status_o10s(void) //add by awesome
 		float temp;
 		bool got_temperature = battery.get_temperature(temp, ins);
 		CHECK_PAYLOAD_SIZE(BATTERY_STATUS);
-		mavlink_msg_battery_status_send(chan,
-										ins, // id
-										MAV_BATTERY_FUNCTION_UNKNOWN, // function
-										MAV_BATTERY_TYPE_LIPO, // type
-										got_temperature ? ((int16_t) (temp * 100)) : INT16_MAX, // temperature. INT16_MAX if unknown
-										battery.get_cell_voltages(ins).cells, // cell voltages
-										battery.has_current(ins) ? battery.current_amps(ins) * 100 : -1, // current in centiampere
-										battery.has_current(ins) ? battery.consumed_mah(ins) : -1,       // total consumed current in milliampere.hour
-										battery.has_consumed_energy(ins) ? battery.consumed_wh(ins) * 36 : -1, // consumed energy in hJ (hecto-Joules)
-										battery.capacity_remaining_pct(ins),
-										0, // time remaining, seconds (not provided)
-										MAV_BATTERY_CHARGE_STATE_UNDEFINED);
-		uint8_t oins = ins;
-		if(0==ins) ins=1; else ins=0;
-		CHECK_PAYLOAD_SIZE(BATTERY_STATUS);
-		mavlink_msg_battery_status_send(chan,
-										ins, // id
-										MAV_BATTERY_FUNCTION_UNKNOWN, // function
-										MAV_BATTERY_TYPE_UNKNOWN, // type
-										got_temperature ? ((int16_t) (temp * 100)) : INT16_MAX, // temperature. INT16_MAX if unknown
-										battery.get_cell_voltages(oins).cells[2], // cell voltages
-										battery.has_current(ins) ? battery.current_amps(ins) * 100 : -1, // current in centiampere
-										battery.has_current(ins) ? battery.consumed_mah(ins) : -1,       // total consumed current in milliampere.hour
-										battery.has_consumed_energy(ins) ? battery.consumed_wh(ins) * 36 : -1, // consumed energy in hJ (hecto-Joules)
-										battery.capacity_remaining_pct(ins),
-										0, // time remaining, seconds (not provided)
-										MAV_BATTERY_CHARGE_STATE_UNDEFINED);
-		send_text(MAV_SEVERITY_WARNING,"batt 12s");
-		return true
+		if(!first[chan])
+		{
+			first[chan] = true;
+			mavlink_msg_battery_status_send(chan,
+											0, // id
+											MAV_BATTERY_FUNCTION_UNKNOWN, // function
+											MAV_BATTERY_TYPE_LIPO, // type
+											got_temperature ? ((int16_t) (temp * 100)) : INT16_MAX, // temperature. INT16_MAX if unknown
+											battery.get_cell_voltages(ins).cells, // cell voltages
+											battery.has_current(ins) ? battery.current_amps(ins) * 100 : -1, // current in centiampere
+											battery.has_current(ins) ? battery.consumed_mah(ins) : -1,       // total consumed current in milliampere.hour
+											battery.has_consumed_energy(ins) ? battery.consumed_wh(ins) * 36 : -1, // consumed energy in hJ (hecto-Joules)
+											battery.capacity_remaining_pct(ins),
+											0, // time remaining, seconds (not provided)
+											MAV_BATTERY_CHARGE_STATE_UNDEFINED);
+		}else{
+			first[chan] = false;
+			mavlink_msg_battery_status_send(chan,
+											1, // id
+											MAV_BATTERY_FUNCTION_UNKNOWN, // function
+											MAV_BATTERY_TYPE_LIPO, // type
+											got_temperature ? ((int16_t) (temp * 100)) : INT16_MAX, // temperature. INT16_MAX if unknown
+											(const uint16_t*)(&(battery.get_cell_voltages(ins).cells[2])), // cell voltages
+											battery.has_current(ins) ? battery.current_amps(ins) * 100 : -1, // current in centiampere
+											battery.has_current(ins) ? battery.consumed_mah(ins) : -1,       // total consumed current in milliampere.hour
+											battery.has_consumed_energy(ins) ? battery.consumed_wh(ins) * 36 : -1, // consumed energy in hJ (hecto-Joules)
+											battery.capacity_remaining_pct(ins),
+											0, // time remaining, seconds (not provided)
+											MAV_BATTERY_CHARGE_STATE_UNDEFINED);
+		}
+		return true;
 	}
 	else return false;
 }
-#endif
 
 
 void GCS_MAVLINK::send_battery_status(const AP_BattMonitor &battery,
@@ -272,9 +273,8 @@ void GCS_MAVLINK::send_battery_status(const AP_BattMonitor &battery,
 // returns true if all battery instances were reported
 bool GCS_MAVLINK::send_battery_status() const
 {
-    const AP_BattMonitor &battery = AP::battery();
+    AP_BattMonitor &battery = AP::battery();
 
-#if BATTMONITOR_SMBUS_MAXELL_NUM_CELLS>10  //add by awesome
 	bool have_o10s = false;
 	for(uint8_t i=0; i<battery.num_instances(); ++i){
 		if(battery.get_type(i)==AP_BattMonitor_Params::BattMonitor_TYPE_MAXELL){
@@ -283,15 +283,19 @@ bool GCS_MAVLINK::send_battery_status() const
 		}
 	}
 	if(have_o10s)
+	{
 		send_battery_status_o10s();
-		return true
-#endif
+		return true;
+	}else
+	{
+		for(uint8_t i = 0; i < battery.num_instances(); i++) {
+			CHECK_PAYLOAD_SIZE(BATTERY_STATUS);
+			send_battery_status(battery, i);
+		}
+		return true;
+	}
 
-    for(uint8_t i = 0; i < battery.num_instances(); i++) {
-        CHECK_PAYLOAD_SIZE(BATTERY_STATUS);
-        send_battery_status(battery, i);
-    }
-    return true;
+
 }
 
 void GCS_MAVLINK::send_distance_sensor(const AP_RangeFinder_Backend *sensor, const uint8_t instance) const

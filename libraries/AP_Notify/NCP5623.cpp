@@ -28,8 +28,8 @@ extern const AP_HAL::HAL& hal;
 #define NCP5623_LED_DIM     0x0f    // dim
 #define NCP5623_LED_OFF     0x00    // off
 
-#define NCP5623_LED_I2C_ADDR 0x38    // default I2C bus address
-#define NCP5623_C_LED_I2C_ADDR 0x39    // default I2C bus address for the NCP5623C
+#define NCP5623_LED_I2C_ADDR 38    // default I2C bus address
+#define NCP5623_C_LED_I2C_ADDR 39    // default I2C bus address for the NCP5623C
 
 #define NCP5623_LED_PWM0    0x40    // pwm0 register
 #define NCP5623_LED_PWM1    0x60    // pwm1 register
@@ -74,9 +74,9 @@ bool NCP5623::hw_init(void)
         _dev->get_semaphore()->take_blocking();
         _dev->set_retries(10);
 
-        // enable the led
         bool ret = write(NCP5623_LED_ENABLE, 0x1f);
         if (!ret) {
+        	gcs().send_text(MAV_SEVERITY_WARNING,"no NCP5623");
             _dev->get_semaphore()->give();
             continue;
         }
@@ -117,4 +117,5 @@ void NCP5623::_timer(void)
     _need_update = false;
 
     write_pwm(rgb);
+    gcs().send_text(MAV_SEVERITY_WARNING,"NCP5623 timer");
 }

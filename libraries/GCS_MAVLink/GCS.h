@@ -166,9 +166,7 @@ public:
     void send_heartbeat(void) const;
     void send_meminfo(void);
     void send_power_status(void);
-#if BATTMONITOR_SMBUS_MAXELL_NUM_CELLS>10
-    bool send_battery_status_o10s(void);
-#endif
+    bool send_battery_status_o10s(void) const;
     void send_battery_status(const AP_BattMonitor &battery,
                              const uint8_t instance) const;
     bool send_battery_status() const;

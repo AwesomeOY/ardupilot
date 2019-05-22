@@ -4,6 +4,7 @@
 #include "AP_BattMonitor.h"
 #include "AP_BattMonitor_SMBus_Maxell.h"
 #include <utility>
+#include <GCS_MAVLink/GCS.h>
 
 #define BATTMONITOR_SMBUS_MAXELL_NUM_CELLS 12
 uint8_t maxell_cell_ids[] = { 0x3f,  // cell 1
@@ -79,7 +80,7 @@ void AP_BattMonitor_SMBus_Maxell::timer()
 
     // read current (A)
     if (read_word(BATTMONITOR_SMBUS_CURRENT, data)) {
-        _state.current_amps = (float)((int16_t)data) / 1000.0f;
+        _state.current_amps = -(float)((int16_t)data) /100.0;
         _state.last_time_micros = tnow;
     }
 
