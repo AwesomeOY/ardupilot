@@ -605,6 +605,14 @@ void GCS_MAVLINK::handle_gimbal_report(AP_Mount &mount, mavlink_message_t *msg) 
     mount.handle_gimbal_report(chan, msg);
 }
 
+/*
+* 	 DATA16 add by awesome
+*/
+void GCS_MAVLINK::handle_data16(AP_Mount &mount, mavlink_message_t *msg) const
+{
+    mount.handle_data16(chan, msg);
+}
+/* end by awesome */
 
 void GCS_MAVLINK::send_textv(MAV_SEVERITY severity, const char *fmt, va_list arg_list)
 {
@@ -2434,12 +2442,12 @@ void GCS_MAVLINK::send_banner()
     send_text(MAV_SEVERITY_INFO, fwver.fw_string);
 
     if (fwver.middleware_name && fwver.os_name) {
-        send_text(MAV_SEVERITY_INFO, "%s: %s %s: %s",
-                  fwver.middleware_name, fwver.middleware_hash_str,
-                  fwver.os_name, fwver.os_hash_str);
+    	send_text(MAV_SEVERITY_INFO, "%s: %s %s: %s",
+    	    	                     "JOYTON"/*fwver.middleware_name*/, fwver.middleware_hash_str,
+    	    	                     "CBRTOS"/*fwver.os_name*/, fwver.os_hash_str);
     } else if (fwver.os_name) {
-        send_text(MAV_SEVERITY_INFO, "%s: %s",
-                  fwver.os_name, fwver.os_hash_str);
+    	send_text(MAV_SEVERITY_INFO, "%s: %s",
+    	    	  "CBRTOS"/*fwver.os_name*/, fwver.os_hash_str);
     }
 
     // send system ID if we can

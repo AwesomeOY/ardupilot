@@ -5,13 +5,23 @@ extern const AP_HAL::HAL& hal;
 // set_angle_targets - sets angle targets in degrees
 void AP_Mount_Backend::set_angle_targets(float roll, float tilt, float pan)
 {
-    // set angle targets
-    _angle_ef_target_rad.x = radians(roll);
-    _angle_ef_target_rad.y = radians(tilt);
-    _angle_ef_target_rad.z = radians(pan);
+	if(_frontend.get_mount_type()==6)  /* modify by awesome */
+	{
+		_angle_ef_target_rad.y = tilt;
+		_angle_ef_target_rad.z = pan;
+		_frontend.set_mode(_instance, MAV_MOUNT_MODE_MAVLINK_TARGETING);
+		//gcs().send_text(MAV_SEVERITY_INFO, "angles: tilt=%5.1f, pan=%5.1f",_angle_ef_target_rad.y,_angle_ef_target_rad.z);
+	}else
+	{
+		// set angle targets
+		_angle_ef_target_rad.x = radians(roll);
+		_angle_ef_target_rad.y = radians(tilt);
+		_angle_ef_target_rad.z = radians(pan);
 
-    // set the mode to mavlink targeting
-    _frontend.set_mode(_instance, MAV_MOUNT_MODE_MAVLINK_TARGETING);
+		// set the mode to mavlink targeting
+
+	   _frontend.set_mode(_instance, MAV_MOUNT_MODE_MAVLINK_TARGETING);
+	}
 }
 
 // set_roi_target - sets target location that mount should attempt to point towards
