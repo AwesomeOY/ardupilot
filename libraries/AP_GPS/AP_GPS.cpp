@@ -557,7 +557,7 @@ void AP_GPS::detect_instance(uint8_t instance)
         else if ((_type[instance] == GPS_TYPE_AUTO || _type[instance] == GPS_TYPE_ERB) &&
                  AP_GPS_ERB::_detect(dstate->erb_detect_state, data)) {
             new_gps = new AP_GPS_ERB(*this, state[instance], _port[instance]);
-        } } else if ((_type[instance] == GPS_TYPE_NMEA || type[instance] == GPS_TYPE_HEMI) && AP_GPS_NMEA::_detect(dstate->nmea_detect_state, data)) {
+        }else if ((_type[instance] == GPS_TYPE_NMEA || _type[instance] == GPS_TYPE_HEMI) && AP_GPS_NMEA::_detect(dstate->nmea_detect_state, data)) {
             new_gps = new AP_GPS_NMEA(*this, state[instance], _port[instance]);
         }
     }
@@ -698,13 +698,12 @@ void AP_GPS::update(void)
         if (state[i].status != NO_GPS) {
             num_instances = i+1;
         }
-    }
-
-    if( state[i].have_gps_yaw && yawTimeCount>250 )
+        if( state[i].have_gps_yaw && yawTimeCount>250 )
 	{
 		gcs().send_text(MAV_SEVERITY_INFO, "GPS Yaw: %.2f", static_cast<double>(state[i].gps_yaw));
 		yawTimeCount = 0;
 	}
+     }
 
     // if blending is requested, attempt to calculate weighting for each GPS
     if (_auto_switch == 2) {

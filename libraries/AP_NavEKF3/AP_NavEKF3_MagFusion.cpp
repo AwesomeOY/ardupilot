@@ -339,7 +339,7 @@ void NavEKF3_core::SelectMagFusion()
     // airborne. For other platform types we do this all the time.
     if (!use_compass()) {
         if ((onGround || !assume_zero_sideslip()) && (imuSampleTime_ms - lastSynthYawTime_ms > 140)) {
-        	fuseEulerYaw(true, false)
+        	fuseEulerYaw(true, false);
             magTestRatio.zero();
             yawTestRatio = 0.0f;
             lastSynthYawTime_ms = imuSampleTime_ms;
@@ -927,9 +927,6 @@ void NavEKF3_core::fuseEulerYaw(bool usePredictedYaw, bool useExternalYawSensor)
         // set the yaw to zero and calculate the zero yaw rotation from body to earth frame
         Tbn_zeroYaw.from_euler312(euler312.x, euler312.y, 0.0f);
     }
-
-    // rotate measured mag components into earth frame
-    Vector3f magMeasNED = Tbn_zeroYaw*magDataDelayed.mag;
 
     // Use the difference between the horizontal projection and declination to give the measured yaw
     // If we can't use compass data, set the  measurement to the predicted

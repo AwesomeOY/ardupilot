@@ -167,7 +167,7 @@ void DFMessageWriter_WriteSysInfo::process() {
             }
         } else if (fwver.os_name) {
             if (! _dataflash_backend->Log_Write_MessageF("%s: %s",
-            											"CBRTOS"/*fwver.os_name*/,,
+            											"CBRTOS"/*fwver.os_name*/,
                                                         fwver.os_hash_str)) {
                 return; // call me again
             }
