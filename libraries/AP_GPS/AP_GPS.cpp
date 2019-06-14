@@ -784,7 +784,13 @@ void AP_GPS::update(void)
             }
         } else {
             // AUTO_SWITCH is 0 so no switching of GPSs
-            primary_instance = 0;
+        	for (uint8_t i=0; i<GPS_MAX_RECEIVERS; i++) {
+        		if(state[i].have_gps_yaw && state[i].num_sats>=3 && state[i].status >= GPS_FIX_TYPE_3D_FIX)
+        		{
+        			primary_instance = i;
+        		}
+        		else primary_instance = 0;
+        	}
         }
 
         // copy the primary instance to the blended instance in case it is enabled later
