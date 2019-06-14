@@ -699,10 +699,10 @@ void AP_GPS::update(void)
             num_instances = i+1;
         }
         if( state[i].have_gps_yaw && yawTimeCount>250 )
-	{
-		gcs().send_text(MAV_SEVERITY_INFO, "GPS Yaw: %.2f", static_cast<double>(state[i].gps_yaw));
-		yawTimeCount = 0;
-	}
+		{
+			gcs().send_text(MAV_SEVERITY_INFO, "GPS Yaw: %.2f", static_cast<double>(state[i].gps_yaw));
+			yawTimeCount = 0;
+		}
      }
 
     // if blending is requested, attempt to calculate weighting for each GPS
@@ -748,6 +748,13 @@ void AP_GPS::update(void)
                 for (uint8_t i=0; i<GPS_MAX_RECEIVERS; i++) {
                     if (i == primary_instance) {
                         continue;
+                    }
+                    /* exist gps yaw HDT, select the gps */
+                    if(state[i].have_gps_yaw && state[i].num_sats>=8 && state[i].status >= GPS_FIX_TYPE_3D_FIX)
+                    {
+                    	primary_instance = i;
+						_last_instance_swap_ms = now;
+						continue;
                     }
                     if (state[i].status > state[primary_instance].status) {
                         // we have a higher status lock, or primary is set to the blended GPS, change GPS
