@@ -306,6 +306,8 @@ void Copter::update_batt_compass(void)
         compass.set_throttle(motors->get_throttle());
         compass.set_voltage(battery.voltage());
         compass.read();
+        float heading = compass.calculate_heading(ahrs.get_rotation_body_to_ned());
+        gcs().send_text(MAV_SEVERITY_INFO, "heading: %f", heading);
         // log compass information
         if (should_log(MASK_LOG_COMPASS) && !ahrs.have_ekf_logging()) {
             DataFlash.Log_Write_Compass(compass);
