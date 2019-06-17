@@ -39,6 +39,10 @@ void Copter::init_ardupilot()
     // load parameters from EEPROM
     load_parameters();
 
+    //delay 15s  add by awesome
+    uint32_t tnow = millis();
+    while(millis()-tnow<=15000L);
+
     // time per loop - this gets updated in the main loop() based on
     // actual loop rate
     G_Dt = 1.0 / scheduler.get_loop_rate_hz();
