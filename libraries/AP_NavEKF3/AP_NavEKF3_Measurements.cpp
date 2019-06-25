@@ -577,6 +577,16 @@ void NavEKF3_core::readGpsData()
             // if the GPS has yaw data then input that as well
 			float yaw_deg, yaw_accuracy_deg;
 			if (AP::gps().gps_yaw_deg(yaw_deg, yaw_accuracy_deg)) {
+				static uint16_t count = 0;
+				if(yaw_deg<0.0001) //none gps yaw, select compass heading
+				{
+					++count;
+					if(count>4000)  //400hz   4S
+					{
+						count = 4100;
+						yaw_deg = AP::compass().get_heading();
+					}
+				}else count = 0;
 				writeEulerYawAngle(radians(yaw_deg), radians(yaw_accuracy_deg), gpsDataNew.time_ms, 2);
 			}
 

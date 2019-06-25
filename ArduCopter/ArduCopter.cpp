@@ -298,7 +298,7 @@ void Copter::throttle_loop()
 // should be called at 10hz
 void Copter::update_batt_compass(void)
 {
-	uint32_t count = 0;
+	static uint32_t count = 0;
 	++count;
     // read battery before compass because it may be used for motor interference compensation
     battery.read();
@@ -308,12 +308,11 @@ void Copter::update_batt_compass(void)
         compass.set_throttle(motors->get_throttle());
         compass.set_voltage(battery.voltage());
         compass.read();
-        float heading = compass.calculate_heading(ahrs.get_rotation_body_to_ned());
+        compass.set_heading(compass.calculate_heading(ahrs.get_rotation_body_to_ned())*(180/3.141592653589793f));
         if(count>=30)
         {
         	count = 0;
-        	heading = heading*(3.141592653589793f/180) + 180;
-        	gcs().send_text(MAV_SEVERITY_INFO, "heading: %f", heading);
+        	gcs().send_text(MAV_SEVERITY_INFO, "Heading: %f", compass.get_heading());
         }
         // log compass information
         if (should_log(MASK_LOG_COMPASS) && !ahrs.have_ekf_logging()) {

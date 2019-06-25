@@ -323,6 +323,16 @@ public:
         }
     }
     
+    void set_heading(float heading)
+    {
+    	_heading = heading;
+    }
+
+    float get_heading(void)
+    {
+    	return _heading;
+    }
+
     // return maximum allowed compass offsets
     uint16_t get_offsets_max(void) const {
         return (uint16_t)_offset_max.get();
@@ -422,6 +432,8 @@ private:
     
     // throttle expressed as a percentage from 0 ~ 1.0, used for motor compensation
     float       _thr;
+
+    float _heading;
 
     struct mag_state {
         AP_Int8     external;
