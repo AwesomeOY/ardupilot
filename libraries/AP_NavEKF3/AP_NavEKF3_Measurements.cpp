@@ -578,6 +578,7 @@ void NavEKF3_core::readGpsData()
 			float yaw_deg, yaw_accuracy_deg;
 			if (AP::gps().gps_yaw_deg(yaw_deg, yaw_accuracy_deg)) {
 				static uint16_t count = 0;
+				static bool send = true;
 				if(yaw_deg<0.0001) //none gps yaw, select compass heading
 				{
 					++count;
@@ -585,8 +586,21 @@ void NavEKF3_core::readGpsData()
 					{
 						count = 4100;
 						yaw_deg = AP::compass().get_heading();
+						if(!send)
+						{
+							send = true;
+							gcs().send_text(MAV_SEVERITY_INFO, "Select The Compass Yaw %.2f", yaw_deg);
+						}
 					}
-				}else count = 0;
+				}else 
+				{
+					count = 0;
+					if(send)
+					{
+						gcs().send_text(MAV_SEVERITY_INFO, "Select The GPS Yaw %.2f", yaw_deg);		
+					}
+					send = false;
+				}
 				writeEulerYawAngle(radians(yaw_deg), radians(yaw_accuracy_deg), gpsDataNew.time_ms, 2);
 			}
 

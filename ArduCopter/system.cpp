@@ -40,8 +40,8 @@ void Copter::init_ardupilot()
     load_parameters();
 
     //delay 15s  add by awesome
-    uint32_t tnow = millis();
-    while(millis()-tnow<=15000L);
+    //uint32_t tnow = millis();
+    //while(millis()-tnow<=15000L);
 
     // time per loop - this gets updated in the main loop() based on
     // actual loop rate
