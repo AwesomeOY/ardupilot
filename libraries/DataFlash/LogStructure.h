@@ -695,6 +695,7 @@ struct PACKED log_Current_Cells {
 struct PACKED log_Compass {
     LOG_PACKET_HEADER;
     uint64_t time_us;
+    float heading;
     int16_t  mag_x;
     int16_t  mag_y;
     int16_t  mag_z;
@@ -1123,10 +1124,10 @@ struct PACKED log_DSTL {
 #define IMU_UNITS "sEEEooo--O--zz"
 #define IMU_MULTS "F000000-----00"
 
-#define MAG_LABELS "TimeUS,MagX,MagY,MagZ,OfsX,OfsY,OfsZ,MOfsX,MOfsY,MOfsZ,Health,S"
-#define MAG_FMT   "QhhhhhhhhhBI"
-#define MAG_UNITS "sGGGGGGGGG-s"
-#define MAG_MULTS "FCCCCCCCCC-F"
+#define MAG_LABELS "TimeUS,Head,MagX,MagY,MagZ,OfsX,OfsY,OfsZ,MOfsX,MOfsY,MOfsZ,Health,S"
+#define MAG_FMT   "QfhhhhhhhhhBI"
+#define MAG_UNITS "shGGGGGGGGG-s"
+#define MAG_MULTS "F-CCCCCCCCC-F"
 
 #define PID_LABELS "TimeUS,Des,P,I,D,FF,AFF"
 #define PID_FMT    "Qffffff"

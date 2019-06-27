@@ -1465,6 +1465,7 @@ void DataFlash_Class::Log_Write_Compass_instance(const Compass &compass, const u
     struct log_Compass pkt = {
         LOG_PACKET_HEADER_INIT(type),
         time_us         : time_us,
+		heading			: (float)compass.get_heading();
         mag_x           : (int16_t)mag_field.x,
         mag_y           : (int16_t)mag_field.y,
         mag_z           : (int16_t)mag_field.z,
