@@ -308,7 +308,8 @@ void Copter::update_batt_compass(void)
         compass.set_throttle(motors->get_throttle());
         compass.set_voltage(battery.voltage());
         compass.read();
-        compass.set_heading(compass.calculate_heading(ahrs.get_rotation_body_to_ned())*(180/3.141592653589793f));
+	uint32_t ttt = (uint32_t)((compass.calculate_heading(ahrs.get_rotation_body_to_ned()))*((180/3.141592653589793f)*100)+36000)%36000; //5729.577951308 = (180/3.141592653589793f)*100
+        compass.set_heading(ttt/100.0f);
         if(count>=30)
         {
         	count = 0;
