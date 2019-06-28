@@ -328,7 +328,7 @@ public:
     	_heading = heading;
     }
 
-    float get_heading(void)
+    float get_heading(void) const
     {
     	return _heading;
     }
