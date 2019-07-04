@@ -465,37 +465,37 @@ void NavEKF3_core::readGpsData()
        if(yaw_deg<0.0001) //none gps yaw, select compass heading
        {
           ++count;
-          if(count>4000)  //400hz   4S
+          if(count>1200)  //400hz   4S
+		  {
+			  count = 1300;
+			  yaw_deg = AP::compass().get_heading();
+			  yaw_accuracy_deg = 5;
+			  if(1!=sendFlag)
+			  {
+					  sendFlag == 1;
+					  gcs().send_text(MAV_SEVERITY_INFO, "Select The Compass Yaw %.2f", yaw_deg);
+			   }
+			  writeEulerYawAngle(radians(yaw_deg), radians(yaw_accuracy_deg), gpsDataNew.time_ms, 2);
+		  }
+	  }else
 	  {
-	      count = 4100;
-	      yaw_deg = AP::compass().get_heading();
-	      yaw_accuracy_deg = 5;
-	      if(1!=sendFlag)
-	      {
-                  sendFlag == 1;
-		  gcs().send_text(MAV_SEVERITY_INFO, "Select The Compass Yaw %.2f", yaw_deg);
-              }
-	      writeEulerYawAngle(radians(yaw_deg), radians(yaw_accuracy_deg), gpsDataNew.time_ms, 2);
-	  }
-	}else 
-	{
-	   count = 0;
-	   if(2!=sendFlag)
-	   {
-	      gcs().send_text(MAV_SEVERITY_INFO, "Select The GPS Yaw %.2f", yaw_deg);
-	      sendFlag = 2;		
-	   }
+		   count = 0;
+		   if(2!=sendFlag)
+		   {
+			  gcs().send_text(MAV_SEVERITY_INFO, "Select The GPS Yaw %.2f", yaw_deg);
+			  sendFlag = 2;
+		   }
+		}
+	}else{
+			yaw_deg = AP::compass().get_heading();
+			yaw_accuracy_deg = 5;
+			if(3!=sendFlag)
+			{
+				sendFlag = 3;
+				gcs().send_text(MAV_SEVERITY_INFO, "NO GPS YAW - Select The Compass Yaw %.2f", yaw_deg);
+			}
+			writeEulerYawAngle(radians(yaw_deg), radians(yaw_accuracy_deg), gpsDataNew.time_ms, 2);
 	}
-    }else{
-	      yaw_deg = AP::compass().get_heading();
-	      yaw_accuracy_deg = 5;
-	      if(3!=sendFlag)
-	      {
-                  sendFlag = 3;
-		  gcs().send_text(MAV_SEVERITY_INFO, "NO GPS YAW - Select The Compass Yaw %.2f", yaw_deg);
-              }
-	      writeEulerYawAngle(radians(yaw_deg), radians(yaw_accuracy_deg), gpsDataNew.time_ms, 2);
-   }
 
     if (gps.last_message_time_ms() - lastTimeGpsReceived_ms > frontend->sensorIntervalMin_ms) {
         if (gps.status() >= AP_GPS::GPS_OK_FIX_3D) {
@@ -877,6 +877,7 @@ void NavEKF3_core::writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_
 	 // limit update rate to maximum allowed by sensor buffers and fusion process
 	    // don't try to write to buffer until the filter has been initialised
 	    if (((timeStamp_ms - yawMeasTime_ms) < frontend->sensorIntervalMin_ms) || !statesInitialised) {
+	    	gcs().send_text(MAV_SEVERITY_INFO, "writeEulerYawAngle Error");
 	        return;
 	    }
 
