@@ -298,8 +298,8 @@ void Copter::throttle_loop()
 // should be called at 10hz
 void Copter::update_batt_compass(void)
 {
-	//static uint32_t count = 0;
-	//++count;
+    //static uint32_t count = 0;
+    //++count;
     // read battery before compass because it may be used for motor interference compensation
     battery.read();
 
@@ -312,8 +312,8 @@ void Copter::update_batt_compass(void)
         compass.set_heading(ttt/100.0f);
         compass.set_last_heading_update_ms(AP_HAL::millis());
 
-        /*
-        if(count>=30)
+        
+        /*if(count>=30)
         {
         	count = 0;
         	gcs().send_text(MAV_SEVERITY_INFO, "Heading: %f", compass.get_heading());

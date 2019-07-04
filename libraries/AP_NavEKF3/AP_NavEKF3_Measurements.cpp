@@ -500,9 +500,9 @@ void NavEKF3_core::readGpsData()
 
     if(magHeadingEn)
     {
-    	if( AP::compass().get_last_heading_update_ms-lastTimeGpsReceived_ms > frontend->sensorIntervalMin_ms )
+    	if( AP::compass().get_last_heading_update_ms()-lastTimeGpsReceived_ms > frontend->sensorIntervalMin_ms )
     	{
-    		lastTimeGpsReceived_ms = AP::compass().get_last_heading_update_ms;
+    		lastTimeGpsReceived_ms = AP::compass().get_last_heading_update_ms();
 
             gpsDataNew.time_ms = lastTimeGpsReceived_ms - 50;
             // Correct for the average intersampling delay due to the filter updaterate
