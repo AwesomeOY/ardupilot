@@ -333,6 +333,16 @@ public:
     	return _heading;
     }
 
+    void set_last_heading_update_ms(uint32_t ms)
+    {
+    	_last_heading_update_ms = ms;
+    }
+
+    uint32_t get_last_heading_update_ms(void) const
+    {
+    	return _last_heading_update_ms;
+    }
+
     // return maximum allowed compass offsets
     uint16_t get_offsets_max(void) const {
         return (uint16_t)_offset_max.get();
@@ -434,6 +444,8 @@ private:
     float       _thr;
 
     float _heading;
+
+    uint32_t _last_heading_update_ms;
 
     struct mag_state {
         AP_Int8     external;

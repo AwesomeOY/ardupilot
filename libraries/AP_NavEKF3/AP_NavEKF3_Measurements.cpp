@@ -460,22 +460,23 @@ void NavEKF3_core::readGpsData()
     const AP_GPS &gps = AP::gps();
     static uint8_t sendFlag = 0;
     float yaw_deg, yaw_accuracy_deg; 
+    bool magHeadingEn = false;
     if (AP::gps().gps_yaw_deg(yaw_deg, yaw_accuracy_deg)) {
        static uint16_t count = 0;
        if(yaw_deg<0.0001) //none gps yaw, select compass heading
        {
           ++count;
-          if(count>1200)  //400hz   4S
+          if(count>2000)  //400hz   5S
 		  {
-			  count = 1300;
+			  count = 2010;
 			  yaw_deg = AP::compass().get_heading();
 			  yaw_accuracy_deg = 5;
 			  if(1!=sendFlag)
 			  {
-					  sendFlag == 1;
+					  sendFlag = 1;
 					  gcs().send_text(MAV_SEVERITY_INFO, "Select The Compass Yaw %.2f", yaw_deg);
 			   }
-			  writeEulerYawAngle(radians(yaw_deg), radians(yaw_accuracy_deg), gpsDataNew.time_ms, 2);
+			  magHeadingEn = true;
 		  }
 	  }else
 	  {
@@ -494,8 +495,24 @@ void NavEKF3_core::readGpsData()
 				sendFlag = 3;
 				gcs().send_text(MAV_SEVERITY_INFO, "NO GPS YAW - Select The Compass Yaw %.2f", yaw_deg);
 			}
-			writeEulerYawAngle(radians(yaw_deg), radians(yaw_accuracy_deg), gpsDataNew.time_ms, 2);
+			magHeadingEn = true;
 	}
+
+    if(magHeadingEn)
+    {
+    	if( AP::compass().get_last_heading_update_ms-lastTimeGpsReceived_ms > frontend->sensorIntervalMin_ms )
+    	{
+    		lastTimeGpsReceived_ms = AP::compass().get_last_heading_update_ms;
+
+            gpsDataNew.time_ms = lastTimeGpsReceived_ms - 50;
+            // Correct for the average intersampling delay due to the filter updaterate
+            gpsDataNew.time_ms -= localFilterTimeStep_ms/2;
+            // Prevent the time stamp falling outside the oldest and newest IMU data in the buffer
+            gpsDataNew.time_ms = MIN(MAX(gpsDataNew.time_ms,imuDataDelayed.time_ms),imuDataDownSampledNew.time_ms);
+
+    		writeEulerYawAngle(radians(yaw_deg), radians(yaw_accuracy_deg), gpsDataNew.time_ms, 2);
+    	}
+    }
 
     if (gps.last_message_time_ms() - lastTimeGpsReceived_ms > frontend->sensorIntervalMin_ms) {
         if (gps.status() >= AP_GPS::GPS_OK_FIX_3D) {
