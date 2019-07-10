@@ -138,6 +138,7 @@ public:
         float ground_speed;                 ///< ground speed in m/sec
         float ground_course;                ///< ground course in degrees
         float gps_yaw;                      ///< GPS derived yaw information, if available (degrees)
+        uint16_t gps_yaw_error_count;       ///< gps yaw error count
         uint16_t hdop;                      ///< horizontal dilution of precision in cm
         uint16_t vdop;                      ///< vertical dilution of precision in cm
         uint8_t num_sats;                   ///< Number of visible satellites

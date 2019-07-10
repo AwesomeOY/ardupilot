@@ -305,7 +305,22 @@ bool AP_GPS_NMEA::_term_complete()
                 case _GPS_SENTENCE_HDT:
                     _last_HDT_ms = now;
                     state.gps_yaw = wrap_360(_new_gps_yaw*0.01f);
-                    state.have_gps_yaw = true;
+                    if(state.gps_yaw<=0.01)
+                    {
+                    	if(state.gps_yaw_error_count<30)
+                    		++state.gps_yaw_error_count;
+                    }else
+                    {
+                    	if(state.gps_yaw_error_count>0)
+                    		--state.gps_yaw_error_count;
+                    }
+                    if(state.gps_yaw_error_count>=20 && state.gps_yaw_error_count<=30)
+                    {
+                    	state.have_gps_yaw = false;
+                    }else if(state.gps_yaw_error_count<=10)
+                    {
+                    	state.have_gps_yaw = true;
+                    }
                     break;
                 }
             } else {
