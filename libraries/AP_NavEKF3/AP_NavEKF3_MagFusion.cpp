@@ -274,7 +274,7 @@ void NavEKF3_core::SelectMagFusion()
 		   }
 	   }
 
-	   if( AP::gps().have_gps_yaw()==false || !AP::Compass()->healthy() )
+	   if( AP::gps().have_gps_yaw()==false && !AP::compass().healthy() )
 	   {
 		   if ((onGround || !assume_zero_sideslip()) && (imuSampleTime_ms - lastSynthYawTime_ms > 15000)) {
 			   fuseEulerYaw(true, false);

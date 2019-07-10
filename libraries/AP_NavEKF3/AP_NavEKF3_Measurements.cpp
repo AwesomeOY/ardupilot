@@ -457,9 +457,9 @@ void NavEKF3_core::readGpsData()
 {
     // check for new GPS data
     // limit update rate to avoid overflowing the FIFO buffer
+    const AP_GPS &gps = AP::gps();
 	if(frontend->_magCal == 5)
 	{
-		const AP_GPS &gps = AP::gps();
 		static uint8_t sendFlag = 0;
 		float yaw_deg, yaw_accuracy_deg;
 		bool magHeadingEn = false;
@@ -897,7 +897,7 @@ void NavEKF3_core::writeEulerYawAngle(float yawAngle, float yawAngleErr, uint32_
 	 // limit update rate to maximum allowed by sensor buffers and fusion process
 	    // don't try to write to buffer until the filter has been initialised
 	    if (((timeStamp_ms - yawMeasTime_ms) < frontend->sensorIntervalMin_ms) || !statesInitialised) {
-	    	gcs().send_text(MAV_SEVERITY_INFO, "writeEulerYawAngle Error");
+	    	//gcs().send_text(MAV_SEVERITY_INFO, "writeEulerYawAngle Error");
 	        return;
 	    }
 
